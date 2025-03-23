@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+    environment:
+      - NODE_ENV=development
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm start
+
+  backend:
+    build: ../voice-assistant-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../voice-assistant-backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 

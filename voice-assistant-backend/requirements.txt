@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+faster-whisper
+google-generativeai
+python-dotenv
+pydantic
+whisper
