@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Platform, SafeAreaView, Image } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Platform, SafeAreaView, Image, TextInput } from "react-native";
 import { Audio } from "expo-av";
 import axios from "axios";
 import Markdown from 'react-native-markdown-display';
@@ -11,9 +11,9 @@ const micIcon = require('./assets/mic.png');
 const stopIcon = require('./assets/stop.png');
 const aiIcon = require('./assets/ai.png');
 const userIcon = require('./assets/user.png');
-const sunIcon = require('./assets/user.png');
-const moonIcon = require('./assets/user.png');
-
+const sunIcon = require('./assets/sun.png');
+const moonIcon = require('./assets/moon.png');
+const sendIcon = require('./assets/send.png');
 // Update API URL configuration with WiFi IP
 const API_URL = Platform.select({
     android: 'http://192.168.0.102:8000',
@@ -30,6 +30,8 @@ const AppContent = () => {
     const [loading, setLoading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [error, setError] = useState<string>("");
+    const [textInput, setTextInput] = useState("");
+    const [inputMethod, setInputMethod] = useState<'voice' | 'text'>('voice');
 
     const formatResponse = (response: string) => {
         if (response.includes("```")) {
@@ -119,6 +121,35 @@ const AppContent = () => {
         }
     };
 
+    const handleSendText = async () => {
+        if (!textInput.trim()) return;
+        
+        setLoading(true);
+        setError("");
+        
+        try {
+            setTranscription(textInput);
+            console.log("Sending request to AI endpoint:", `${API_URL}/ask/`);
+            const aiRes = await axios.post(`${API_URL}/ask/`, null, {
+                params: {
+                    question: textInput
+                }
+            });
+            console.log("AI response:", aiRes.data);
+            setAiResponse(formatResponse(aiRes.data.response));
+            setTextInput(""); // Clear input after sending
+        } catch (err: any) {
+            const errorMsg = err.response
+                ? `Server Error: ${err.response.status} - ${JSON.stringify(err.response.data)}`
+                : `Network Error: ${err.message || 'Unknown error'}`;
+            console.error("Error details:", errorMsg);
+            setError(errorMsg);
+            setAiResponse("Failed to get AI response");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -143,18 +174,61 @@ const AppContent = () => {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.content}>
-                    <TouchableOpacity
-                        style={[styles.recordButton, isRecording && styles.recordingButton]}
-                        onPress={isRecording ? stopRecording : startRecording}
-                    >
-                        <Image 
-                            source={isRecording ? stopIcon : micIcon}
-                            style={styles.recordButtonIcon}
-                        />
-                        <Text style={styles.recordButtonText}>
-                            {isRecording ? "Stop Recording" : "Start Recording"}
-                        </Text>
-                    </TouchableOpacity>
+                    <View style={styles.inputMethodToggle}>
+                        <TouchableOpacity 
+                            style={[
+                                styles.toggleButton,
+                                inputMethod === 'voice' && styles.toggleButtonActive
+                            ]}
+                            onPress={() => setInputMethod('voice')}
+                        >
+                            <Image source={micIcon} style={styles.toggleIcon} />
+                            <Text style={styles.toggleText}>Voice</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={[
+                                styles.toggleButton,
+                                inputMethod === 'text' && styles.toggleButtonActive
+                            ]}
+                            onPress={() => setInputMethod('text')}
+                        >
+                            <Text style={styles.toggleText}>Text</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {inputMethod === 'voice' ? (
+                        <TouchableOpacity
+                            style={[styles.recordButton, isRecording && styles.recordingButton]}
+                            onPress={isRecording ? stopRecording : startRecording}
+                        >
+                            <Image 
+                                source={isRecording ? stopIcon : micIcon}
+                                style={styles.recordButtonIcon}
+                            />
+                            <Text style={styles.recordButtonText}>
+                                {isRecording ? "Stop Recording" : "Start Recording"}
+                            </Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={styles.textInputContainer}>
+                            <TextInput
+                                style={styles.textInput}
+                                value={textInput}
+                                onChangeText={setTextInput}
+                                placeholder="Type your message..."
+                                placeholderTextColor={theme === 'light' ? '#64748B' : '#94A3B8'}
+                                multiline
+                                maxLength={500}
+                            />
+                            <TouchableOpacity 
+                                style={styles.sendButton}
+                                onPress={handleSendText}
+                                disabled={!textInput.trim() || loading}
+                            >
+                                <Image source={sendIcon} style={styles.sendIcon} />
+                            </TouchableOpacity>
+                        </View>
+                    )}
 
                     {loading && (
                         <View style={styles.loadingContainer}>
