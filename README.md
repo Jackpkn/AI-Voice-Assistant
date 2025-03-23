@@ -1,6 +1,34 @@
-# Voice Assistant Project
+# Voice Assistant App
 
-A modern voice assistant application with a React Native frontend and FastAPI backend. This project enables voice-based interactions, speech-to-text conversion, and AI-powered responses.
+A modern voice assistant application with React Native frontend and FastAPI backend, featuring voice input, text input, and AI-powered responses.
+
+## Screenshots
+
+### Light Theme
+![Light Theme - Voice Input](screenshots/image1.jpeg)
+ 
+
+![Light Theme - Text Input](screenshots/image2.jpeg)
+ 
+
+### Dark Theme
+![Dark Theme - Voice Input](screenshots/image3.jpeg)
+ 
+ 
+ 
+
+## Features
+
+- Voice input capture using device microphone
+- Text input option for typing messages
+- Real-time speech-to-text conversion
+- AI-powered responses
+- Dark/Light theme support
+- Beautiful and modern UI
+- Cross-platform compatibility (iOS & Android)
+- Markdown support for AI responses
+- Code block formatting
+- Error handling and loading states
 
 ## Project Structure
 
